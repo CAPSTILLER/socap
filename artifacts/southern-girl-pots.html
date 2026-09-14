@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Southern Girl Pots</title>
+  <style>
+    :root {
+      --bay: #1a4f6e;
+      --foam: #c8e8f0;
+      --oldbay: #c41e3a;
+      --sand: #f4e4c1;
+      --ink: #1a1510;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      background: #0b1218;
+      color: var(--sand);
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      overscroll-behavior: none;
+      touch-action: none;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100%;
+      padding: 12px;
+    }
+    h1.wordmark {
+      font-size: 14px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #f0d9a0;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+    #wrap {
+      width: min(92vw, 92vh, 560px);
+      aspect-ratio: 1 / 1;
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(0,0,0,.55), 0 0 0 3px #8b1e2d;
+      background: #123;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: #245;
+    }
+    #hud {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      text-shadow: 0 1px 2px #000;
+    }
+    .panel {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 22px;
+      text-align: center;
+      pointer-events: auto;
+      background: linear-gradient(180deg, rgba(12,28,42,.72), rgba(12,22,30,.88));
+    }
+    .panel h2 {
+      font-size: clamp(22px, 6vw, 34px);
+      letter-spacing: .06em;
+      color: #fff4d6;
+      margin-bottom: 6px;
+    }
+    .panel .sub {
+      font-size: 13px;
+      color: #f0c9c9;
+      margin-bottom: 16px;
+    }
+    .panel p {
+      max-width: 34em;
+      font-size: 14px;
+      line-height: 1.45;
+      color: #e8e0d0;
+      margin-bottom: 10px;
+    }
+    .panel .how {
+      text-align: left;
+      background: rgba(0,0,0,.28);
+      border: 1px solid rgba(255,220,160,.2);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin: 8px 0 16px;
+      font-size: 13px;
+    }
+    button.play {
+      pointer-events: auto;
+      appearance: none;
+      border: 0;
+      background: var(--oldbay);
+      color: #fff8ea;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      font-size: 16px;
+      padding: 12px 28px;
+      border-radius: 4px;
+      cursor: pointer;
+      box-shadow: 0 3px 0 #7a1424;
+    }
+    button.play:active { transform: translateY(2px); box-shadow: none; }
+    a.shop {
+      display: inline-block;
+      margin-top: 10px;
+      color: #fff4d6;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    #note {
+      position: absolute;
+      left: 8%;
+      right: 8%;
+      bottom: 14%;
+      background: #f7ecd0;
+      color: #2a1c10;
+      border: 3px solid #6b3a1e;
+      border-radius: 4px;
+      padding: 12px 14px;
+      font-size: 15px;
+      line-height: 1.35;
+      display: none;
+      pointer-events: auto;
+      z-index: 5;
+      box-shadow: 4px 4px 0 rgba(0,0,0,.35);
+    }
+    #note small { display: block; margin-top: 6px; color: #7a4a28; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+    .hint {
+      position: absolute;
+      bottom: 8px;
+      left: 0; right: 0;
+      text-align: center;
+      font-size: 11px;
+      color: rgba(255,255,255,.55);
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="wordmark">FV SOUTHERN GIRL · BODKIN POINT SEAFOOD</div>
+  <div id="wrap">
+    <canvas id="c" width="640" height="640"></canvas>
+    <div id="hud">
+      <div class="topbar">
+        <span id="timer">0:45</span>
+        <span id="haul">Pots 0</span>
+      </div>
+    </div>
+    <div id="title" class="panel">
+      <h2>SOUTHERN GIRL POTS</h2>
+      <div class="sub">A 45-second line on the Chesapeake</div>
+      <div class="how">
+        Hold left or right to run the boat.<br />
+        When the bow is over a pot, tap the pot to haul it.<br />
+        Grab the Capstillers hat if it floats by.<br />
+        Read the notes. Rivals hide toys. Keep pulling.
+      </div>
+      <button class="play" id="playBtn">PLAY</button>
+      <p style="margin-top:14px;font-size:12px;opacity:.75">Inspired by Capt. Luke McFadden · not an official product</p>
+    </div>
+    <div id="end" class="panel" style="display:none">
+      <h2>HEAD TO THE STAND</h2>
+      <div class="sub" id="endStats"></div>
+      <p>
+        7333 E Furnace Branch Rd<br />
+        Glen Burnie, MD 21060<br />
+        Fri–Sun · (410) 979-9941
+      </p>
+      <p style="font-size:13px">Boat to throat. Come get the real ones.</p>
+      <button class="play" id="againBtn">RUN IT AGAIN</button>
+      <a class="shop" id="shopLink" href="https://linktr.ee/BodkinpointseafoodLuke" target="_blank" rel="noopener">Luke’s links & shipping →</a>
+    </div>
+    <div id="note"></div>
+    <div class="hint">← hold left &nbsp; tap pot to haul &nbsp; hold right →</div>
+  </div>
+
+<script>
+(() => {
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d");
+  const W = 640, H = 640;
+
+  const titleEl = document.getElementById("title");
+  const endEl = document.getElementById("end");
+  const noteEl = document.getElementById("note");
+  const timerEl = document.getElementById("timer");
+  const haulEl = document.getElementById("haul");
+  const endStats = document.getElementById("endStats");
+
+  const MESSAGES = [
+    { tag: "RIVAL NOTE", text: "Nice engine. Does the boat come with it or is that extra?" },
+    { tag: "TOY", text: "Returned your left boot. The right one made better bait." },
+    { tag: "BAIT", text: "Hot dog special. Crabs voted 12–0." },
+    { tag: "BAIT", text: "Marshmallows. Don’t ask. They asked." },
+    { tag: "RIVAL NOTE", text: "If you’re reading this, you’re in my line. Move over, TikTok." },
+    { tag: "TOY", text: "Found your merch hat. The crabs look better in it." },
+    { tag: "RIVAL NOTE", text: "Boat-to-throat? These ones requested Old Bay first." },
+    { tag: "TOY", text: "Rubber duck from a rival skiff. She says hi. Reluctantly." },
+    { tag: "EMPTY", text: "This pot was empty. Emotionally." },
+    { tag: "CRABS", text: "Jimmies in here. Sooks next door. Don’t mix ’em, captain." },
+    { tag: "RIVAL NOTE", text: "Your outboard called. It wants its dignity back." },
+    { tag: "BAIT", text: "Pizza crust bait. Works. Don’t tell DNR the topping." },
+    { tag: "RIVAL NOTE", text: "Stop filming every pot. Some of us have a brand too." },
+    { tag: "TOY", text: "Toy tractor. Eastern Shore delivery. No signature required." },
+    { tag: "RIVAL NOTE", text: "These crabs have seen your comments section. They’re tired." },
+    { tag: "CRABS", text: "You ain’t no crabber… but you are in the right zip code." },
+    { tag: "RIVAL NOTE", text: "Bay Bridge traffic is still faster than this haul." },
+    { tag: "CRABS", text: "Left you a bushel of advice: steam ’em, don’t boil ’em." },
+    { tag: "TOY", text: "Who put a glow stick in here. It’s not a rave, Luke." },
+    { tag: "NOTE", text: "See you Friday–Sunday. 7333 E Furnace Branch. Bring cash and patience." }
+  ];
+
+  const BAIT_KINDS = ["hotdog", "mallow", "pizza", "nugget", "corn", "crabs", "duck", "boot"];
+
+  let state = "title"; // title | play | haul | end
+  let t0 = 0;
+  let timeLeft = 45;
+  let potsPulled = 0;
+  let hatOn = false;
+  let hatGot = false;
+  let keys = { l: false, r: false };
+  let pointerX = null;
+  let holding = false;
+
+  const boat = {
+    x: 280,
+    y: 430,
+    vx: 0,
+    tilt: 0,
+    facing: 1
+  };
+
+  let pots = [];
+  let hat = null;
+  let splash = [];
+  let crabsOnPot = [];
+  let haul = null;
+  let msgQueue = shuffle(MESSAGES.slice());
+  let waterPhase = 0;
+  let last = 0;
+
+  function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function nextMsg() {
+    if (!msgQueue.length) msgQueue = shuffle(MESSAGES.slice());
+    return msgQueue.pop();
+  }
+
+  function spawnPot(x) {
+    pots.push({
+      x: x,
+      y: 455 + Math.random() * 10,
+      bob: Math.random() * Math.PI * 2,
+      pulled: false,
+      kind: BAIT_KINDS[Math.floor(Math.random() * BAIT_KINDS.length)],
+      buoy: Math.random() > 0.5 ? "#d22" : "#eee"
+    });
+  }
+
+  function resetPlay() {
+    boat.x = 260;
+    boat.vx = 0;
+    boat.tilt = 0;
+    pots = [];
+    splash = [];
+    crabsOnPot = [];
+    haul = null;
+    hatOn = false;
+    hatGot = false;
+    potsPulled = 0;
+    timeLeft = 45;
+    msgQueue = shuffle(MESSAGES.slice());
+    for (let i = 0; i < 6; i++) spawnPot(80 + i * 110 + Math.random() * 20);
+    hat = { x: 520, y: 400, vx: -0.55, bob: 0, taken: false };
+    noteEl.style.display = "none";
+    haulEl.textContent = "Pots 0";
+    timerEl.textContent = "0:45";
+  }
+
+  function startGame() {
+    resetPlay();
+    titleEl.style.display = "none";
+    endEl.style.display = "none";
+    state = "play";
+    t0 = performance.now();
+    last = t0;
+  }
+
+  function endGame() {
+    state = "end";
+    noteEl.style.display = "none";
+    endEl.style.display = "flex";
+    const extra = hatOn ? " · Capstillers secured" : "";
+    endStats.textContent = potsPulled + " pot" + (potsPulled === 1 ? "" : "s") + " pulled" + extra;
+  }
+
+  document.getElementById("playBtn").onclick = startGame;
+  document.getElementById("againBtn").onclick = startGame;
+
+  function setSideFromX(x) {
+    const rect = canvas.getBoundingClientRect();
+    const nx = ((x - rect.left) / rect.width) * W;
+    pointerX = nx;
+    keys.l = nx < W * 0.42;
+    keys.r = nx > W * 0.58;
+  }
+
+  canvas.addEventListener("pointerdown", (e) => {
+    holding = true;
+    setSideFromX(e.clientX);
+    if (state === "haul") {
+      dismissNote();
+      return;
+    }
+    if (state === "play") tryHaul();
+  });
+  canvas.addEventListener("pointermove", (e) => {
+    if (holding) setSideFromX(e.clientX);
+  });
+  window.addEventListener("pointerup", () => {
+    holding = false;
+    keys.l = keys.r = false;
+  });
+  noteEl.addEventListener("pointerdown", dismissNote);
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowLeft" || e.key === "a") keys.l = true;
+    if (e.key === "ArrowRight" || e.key === "d") keys.r = true;
+    if (e.key === " " || e.key === "Enter") {
+      if (state === "title") startGame();
+      else if (state === "play") tryHaul();
+      else if (state === "haul") dismissNote();
+    }
+  });
+  window.addEventListener("keyup", (e) => {
+    if (e.key === "ArrowLeft" || e.key === "a") keys.l = false;
+    if (e.key === "ArrowRight" || e.key === "d") keys.r = false;
+  });
+
+  function nearestPot() {
+    let best = null, bestD = 62;
+    for (const p of pots) {
+      if (p.pulled) continue;
+      const d = Math.abs((p.x + 10) - (boat.x + 70));
+      if (d < bestD) { bestD = d; best = p; }
+    }
+    return best;
+  }
+
+  function tryHaul() {
+    if (state !== "play") return;
+    const p = nearestPot();
+    if (!p) return;
+    p.pulled = true;
+    potsPulled++;
+    haulEl.textContent = "Pots " + potsPulled;
+    const msg = nextMsg();
+    haul = { pot: p, t: 0, msg };
+    state = "haul";
+    for (let i = 0; i < 10; i++) {
+      splash.push({
+        x: p.x + 10 + (Math.random() - 0.5) * 20,
+        y: p.y,
+        vx: (Math.random() - 0.5) * 2.2,
+        vy: -1 - Math.random() * 2.4,
+        life: 1
+      });
+    }
+    crabsOnPot = [];
+    const n = 4 + Math.floor(Math.random() * 5);
+    for (let i = 0; i < n; i++) {
+      crabsOnPot.push({
+        ox: (Math.random() - 0.5) * 28,
+        oy: (Math.random() - 0.6) * 16,
+        s: 0.7 + Math.random() * 0.5,
+        w: Math.random() * 6
+      });
+    }
+    showNote(msg);
+  }
+
+  function showNote(msg) {
+    noteEl.innerHTML = msg.text + "<small>" + msg.tag + " · tap to keep working</small>";
+    noteEl.style.display = "block";
+  }
+
+  function dismissNote() {
+    if (state !== "haul") return;
+    noteEl.style.display = "none";
+    state = "play";
+    haul = null;
+    // respawn a pot ahead
+    const maxX = Math.max(...pots.map(p => p.x), boat.x);
+    spawnPot(maxX + 90 + Math.random() * 70);
+  }
+
+  function update(dt) {
+    waterPhase += dt * 2.2;
+    if (state === "end" || state === "title") return;
+
+    if (state === "play") {
+      timeLeft -= dt;
+      if (timeLeft <= 0) {
+        timeLeft = 0;
+        endGame();
+        return;
+      }
+      const m = Math.floor(timeLeft);
+      const s = Math.floor((timeLeft % 1) * 10);
+      timerEl.textContent = "0:" + String(m).padStart(2, "0");
+
+      let dir = 0;
+      if (keys.l) dir -= 1;
+      if (keys.r) dir += 1;
+      boat.vx += dir * 520 * dt;
+      boat.vx *= Math.pow(0.04, dt);
+      boat.x += boat.vx * dt;
+      boat.x = Math.max(20, Math.min(470, boat.x));
+      if (dir !== 0) boat.facing = dir;
+      const targetTilt = dir !== 0 ? -1.05 * Math.sign(dir || boat.facing) : 0;
+      // wheelie: bow up when moving. tilt is rotation around stern
+      const want = dir !== 0 ? 0.95 : 0.08;
+      boat.tilt += (want - boat.tilt) * Math.min(1, dt * 7);
+
+      if (hat && !hat.taken) {
+        hat.x += hat.vx;
+        hat.bob += dt * 3;
+        hat.y = 392 + Math.sin(hat.bob) * 6;
+        if (hat.x < -40) hat.x = 680;
+        const hx = hat.x + 16, hy = hat.y + 10;
+        const bx = boat.x + 55, by = boat.y + 10;
+        if (Math.hypot(hx - bx, hy - by) < 46) {
+          hat.taken = true;
+          hatOn = true;
+          hatGot = true;
+        }
+      }
+    }
+
+    if (state === "haul" && haul) {
+      haul.t += dt;
+      if (haul.t > 3.6) dismissNote();
+    }
+
+    for (const s of splash) {
+      s.x += s.vx;
+      s.y += s.vy;
+      s.vy += 9 * dt;
+      s.life -= dt * 1.3;
+    }
+    splash = splash.filter(s => s.life > 0);
+
+    // recycle far pots
+    for (const p of pots) {
+      p.bob += dt * 2;
+      if (!p.pulled && p.x < boat.x - 280) p.x += 640;
+      if (!p.pulled && p.x > boat.x + 420) p.x -= 640;
+    }
+  }
+
+  function drawSky() {
+    const g = ctx.createLinearGradient(0, 0, 0, 360);
+    g.addColorStop(0, "#7ec4e0");
+    g.addColorStop(0.55, "#b7d8e8");
+    g.addColorStop(1, "#dfe9c8");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+
+    // sun
+    ctx.fillStyle = "rgba(255,220,120,.55)";
+    ctx.beginPath();
+    ctx.arc(520, 78, 36, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function drawBridge() {
+    ctx.save();
+    ctx.translate(0, 8);
+    ctx.fillStyle = "#5b6570";
+    // far shore
+    ctx.fillStyle = "#6d8a5a";
+    ctx.beginPath();
+    ctx.moveTo(0, 250);
+    ctx.quadraticCurveTo(200, 236, 640, 248);
+    ctx.lineTo(640, 280);
+    ctx.lineTo(0, 280);
+    ctx.fill();
+
+    ctx.strokeStyle = "#3d4650";
+    ctx.fillStyle = "#4a545e";
+    ctx.lineWidth = 3;
+    // two spans suggestion
+    const y = 188;
+    ctx.beginPath();
+    ctx.moveTo(-20, 230);
+    ctx.lineTo(80, y);
+    ctx.lineTo(200, 168);
+    ctx.lineTo(320, y);
+    ctx.lineTo(440, 168);
+    ctx.lineTo(560, y);
+    ctx.lineTo(680, 230);
+    ctx.stroke();
+    // roadway
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(-20, 228);
+    ctx.quadraticCurveTo(320, 150, 660, 228);
+    ctx.stroke();
+    // towers
+    ctx.lineWidth = 6;
+    [[200, 118], [440, 118]].forEach(([tx, ty]) => {
+      ctx.beginPath();
+      ctx.moveTo(tx - 10, 230);
+      ctx.lineTo(tx - 6, ty);
+      ctx.moveTo(tx + 10, 230);
+      ctx.lineTo(tx + 6, ty);
+      ctx.moveTo(tx - 8, ty + 8);
+      ctx.lineTo(tx + 8, ty + 8);
+      ctx.stroke();
+    });
+    ctx.restore();
+  }
+
+  function drawWater() {
+    const g = ctx.createLinearGradient(0, 360, 0, H);
+    g.addColorStop(0, "#2a7aa0");
+    g.addColorStop(0.4, "#1d5f82");
+    g.addColorStop(1, "#0e3a52");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 360, W, H - 360);
+
+    ctx.strokeStyle = "rgba(200,230,240,.28)";
+    ctx.lineWidth = 1.4;
+    for (let i = 0; i < 9; i++) {
+      ctx.beginPath();
+      const yy = 372 + i * 28;
+      for (let x = 0; x <= W; x += 16) {
+        const y = yy + Math.sin(x * 0.03 + waterPhase + i) * (3 + i * 0.3);
+        if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+  }
+
+  function drawCap(x, y, scale, rot) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(rot || 0);
+    ctx.scale(scale, scale);
+    // pixel-style cap matching Capstillers: white crown, red CAP, red brim, checkered rear
+    ctx.fillStyle = "#c01028";
+    ctx.beginPath();
+    ctx.moveTo(4, 11);
+    ctx.lineTo(36, 13);
+    ctx.lineTo(38, 18);
+    ctx.lineTo(2, 18);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = "#14080c";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    // crown
+    ctx.fillStyle = "#f7f4ef";
+    ctx.beginPath();
+    ctx.moveTo(4, 12);
+    ctx.lineTo(6, 1);
+    ctx.lineTo(20, 0);
+    ctx.lineTo(24, 12);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    // checkered back panel
+    const cols = 3, rows = 4;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        ctx.fillStyle = (r + c) % 2 === 0 ? "#14080c" : "#c01028";
+        ctx.fillRect(-2 + c * 3.2, 4 + r * 3.4, 3.2, 3.4);
+      }
+    }
+    ctx.strokeRect(-2, 4, 9.6, 13.6);
+    // CAP
+    ctx.fillStyle = "#e0142c";
+    ctx.font = "bold 8px monospace";
+    ctx.fillText("CAP", 7, 10);
+    ctx.restore();
+  }
+
+  function drawCrab(x, y, s, ang) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(ang || 0);
+    ctx.scale(s, s);
+    ctx.fillStyle = "#1c4e8a";
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 8, 5.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#c45a20";
+    ctx.fillRect(-10, -2, 5, 3);
+    ctx.fillRect(5, -2, 5, 3);
+    ctx.strokeStyle = "#163860";
+    ctx.lineWidth = 1.2;
+    for (let i = -1; i <= 1; i++) {
+      ctx.beginPath();
+      ctx.moveTo(-3, 2);
+      ctx.lineTo(-8, 6 + i);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(3, 2);
+      ctx.lineTo(8, 6 + i);
+      ctx.stroke();
+    }
+    ctx.fillStyle = "#111";
+    ctx.fillRect(-3, -2, 1.5, 1.5);
+    ctx.fillRect(1.5, -2, 1.5, 1.5);
+    ctx.restore();
+  }
+
+  function drawPot(p, lift) {
+    const y = p.y - (lift || 0) + Math.sin(p.bob) * 3;
+    ctx.save();
+    ctx.translate(p.x, y);
+    // line
+    ctx.strokeStyle = "#cfc8b0";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(10, -18);
+    ctx.lineTo(10, 2);
+    ctx.stroke();
+    // buoy
+    ctx.fillStyle = p.buoy;
+    ctx.beginPath();
+    ctx.ellipse(10, -20, 5, 7, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#222";
+    ctx.fillRect(8, -14, 4, 3);
+    // wire pot
+    ctx.fillStyle = "#6a5840";
+    ctx.strokeStyle = "#2a241c";
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.roundRect(0, 2, 22, 16, 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0, 10);
+    ctx.lineTo(22, 10);
+    ctx.moveTo(7, 2);
+    ctx.lineTo(7, 18);
+    ctx.moveTo(15, 2);
+    ctx.lineTo(15, 18);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawBait(kind, x, y) {
+    ctx.save();
+    ctx.translate(x, y);
+    if (kind === "hotdog") {
+      ctx.fillStyle = "#e8a070";
+      ctx.beginPath(); ctx.roundRect(-10, -4, 20, 8, 4); ctx.fill();
+      ctx.fillStyle = "#c04030";
+      ctx.beginPath(); ctx.roundRect(-8, -3, 16, 6, 3); ctx.fill();
+    } else if (kind === "mallow") {
+      ctx.fillStyle = "#fff";
+      ctx.beginPath(); ctx.roundRect(-6, -6, 8, 8, 2); ctx.fill();
+      ctx.beginPath(); ctx.roundRect(0, -4, 8, 8, 2); ctx.fill();
+      ctx.strokeStyle = "#ccc"; ctx.stroke();
+    } else if (kind === "pizza") {
+      ctx.fillStyle = "#e8c050";
+      ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(10, 8); ctx.lineTo(-10, 8); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = "#c03020";
+      ctx.beginPath(); ctx.arc(-2, 2, 2, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.arc(3, 3, 2, 0, 7); ctx.fill();
+    } else if (kind === "duck") {
+      ctx.fillStyle = "#f5d020";
+      ctx.beginPath(); ctx.arc(0, 0, 7, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.arc(7, -4, 4, 0, 7); ctx.fill();
+      ctx.fillStyle = "#e07020";
+      ctx.fillRect(9, -4, 5, 2);
+    } else if (kind === "corn") {
+      ctx.fillStyle = "#e8c430";
+      ctx.beginPath(); ctx.roundRect(-5, -10, 10, 20, 4); ctx.fill();
+    } else if (kind === "boot") {
+      ctx.fillStyle = "#3a2a1a";
+      ctx.fillRect(-4, -10, 8, 14);
+      ctx.fillRect(-4, 2, 14, 6);
+    } else if (kind === "nugget") {
+      ctx.fillStyle = "#d09030";
+      ctx.beginPath(); ctx.ellipse(-4, 0, 6, 4, 0.2, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(5, 1, 5, 3.5, -0.3, 0, 7); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawBoat() {
+    ctx.save();
+    const sternX = boat.x + 18;
+    const sternY = boat.y + 22;
+    ctx.translate(sternX, sternY);
+    // wheelie rotation around stern / engine
+    const rot = -boat.tilt * 0.9;
+    ctx.rotate(rot);
+
+    // wake
+    if (boat.tilt > 0.2) {
+      ctx.fillStyle = "rgba(230,245,255,.35)";
+      ctx.beginPath();
+      ctx.ellipse(10, 16, 30, 6, 0, 0, 7);
+      ctx.fill();
+    }
+
+    // hull
+    ctx.fillStyle = "#d8d2c6";
+    ctx.strokeStyle = "#2a2420";
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(8, 8);
+    ctx.lineTo(118, 2);
+    ctx.lineTo(126, 10);
+    ctx.lineTo(112, 22);
+    ctx.lineTo(10, 24);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // rub rail
+    ctx.strokeStyle = "#8b1e2d";
+    ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    ctx.moveTo(12, 8);
+    ctx.lineTo(118, 4);
+    ctx.stroke();
+
+    // console
+    ctx.fillStyle = "#2c3338";
+    ctx.fillRect(78, -6, 22, 14);
+    ctx.fillStyle = "#6ad";
+    ctx.fillRect(82, -3, 10, 5);
+
+    // name
+    ctx.fillStyle = "#8b1e2d";
+    ctx.font = "bold 8px sans-serif";
+    ctx.fillText("SOUTHERN GIRL", 28, 16);
+
+    // oversized outboard
+    ctx.fillStyle = "#1c1c1c";
+    ctx.fillRect(-6, -2, 18, 16);
+    ctx.fillStyle = "#c0c4c8";
+    ctx.fillRect(-2, 12, 10, 22);
+    ctx.fillStyle = "#333";
+    ctx.beginPath();
+    ctx.ellipse(3, 36, 8, 4, 0, 0, 7);
+    ctx.fill();
+    ctx.fillStyle = "#e01830";
+    ctx.fillRect(-4, 0, 14, 4);
+
+    // waterman — stylized Luke: dark hair, work shirt, life in the shoulders
+    ctx.save();
+    ctx.translate(64, -2);
+    // legs / torso
+    ctx.fillStyle = "#3d4a38";
+    ctx.fillRect(-6, 6, 12, 12);
+    ctx.fillStyle = "#c45a2a"; // orange work tee / sunburned arms energy
+    ctx.fillRect(-8, -6, 16, 14);
+    // arms on wheel
+    ctx.strokeStyle = "#e0b090";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(-8, 0);
+    ctx.lineTo(-16, 6);
+    ctx.moveTo(8, 0);
+    ctx.lineTo(14, 6);
+    ctx.stroke();
+    // head
+    ctx.fillStyle = "#e0b090";
+    ctx.beginPath();
+    ctx.arc(0, -12, 7.2, 0, 7);
+    ctx.fill();
+    // hair
+    ctx.fillStyle = "#1a140f";
+    ctx.beginPath();
+    ctx.arc(-1, -15, 7.4, Math.PI, 0);
+    ctx.fill();
+    ctx.fillRect(-8, -15, 14, 4);
+    // face hint
+    ctx.fillStyle = "#2a1c14";
+    ctx.fillRect(-3, -12, 1.4, 1.4);
+    ctx.fillRect(2, -12, 1.4, 1.4);
+    if (hatOn) {
+      drawCap(-14, -24, 1.05, -0.25);
+    } else {
+      // default ball cap
+      ctx.fillStyle = "#1a3a28";
+      ctx.beginPath();
+      ctx.ellipse(0, -18, 8, 3.2, 0, 0, 7);
+      ctx.fill();
+      ctx.fillStyle = "#244c34";
+      ctx.fillRect(-1, -18, 10, 3);
+    }
+    ctx.restore();
+
+    ctx.restore();
+  }
+
+  function draw() {
+    drawSky();
+    drawBridge();
+    drawWater();
+
+    // distant pots
+    for (const p of pots) {
+      if (haul && haul.pot === p) continue;
+      if (!p.pulled) drawPot(p, 0);
+    }
+
+    if (hat && !hat.taken) drawCap(hat.x, hat.y, 1.35, Math.sin(hat.bob) * 0.2);
+
+    drawBoat();
+
+    if (haul) {
+      const lift = Math.min(90, haul.t * 140);
+      drawPot(haul.pot, lift);
+      const px = haul.pot.x + 11;
+      const py = haul.pot.y - lift - 6;
+      drawBait(haul.pot.kind, px, py - 10);
+      for (const c of crabsOnPot) {
+        drawCrab(px + c.ox, py + c.oy + Math.sin(haul.t * 8 + c.w) * 2, c.s, Math.sin(haul.t * 3 + c.w) * 0.3);
+      }
+    }
+
+    for (const s of splash) {
+      ctx.globalAlpha = Math.max(0, s.life);
+      ctx.fillStyle = "#e8f6ff";
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, 3, 0, 7);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    // haul zone marker
+    if (state === "play") {
+      const p = nearestPot();
+      if (p) {
+        ctx.strokeStyle = "rgba(255,220,120,.7)";
+        ctx.setLineDash([4, 4]);
+        ctx.strokeRect(p.x - 6, p.y - 28, 34, 50);
+        ctx.setLineDash([]);
+      }
+    }
+  }
+
+  function loop(now) {
+    const dt = Math.min(0.033, (now - last) / 1000 || 0.016);
+    last = now;
+    update(dt);
+    draw();
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
