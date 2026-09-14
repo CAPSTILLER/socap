@@ -1,0 +1,38 @@
+{
+  "url": "http://127.0.0.1:8081/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Southern Girl Pots",
+      "hasCanvas": true,
+      "bodyTextLen": 326,
+      "bodyTextHash": "d9fd18d2083f9ddf8ad6cee59978e1e9231923c02fd40f8342e3a486d7701892",
+      "bodyTextPrefix": "FV SOUTHERN GIRL · BODKIN POINT SEAFOOD SOUTHERN GIRL POTS A 45-",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-built.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Southern Girl Pots",
+      "hasCanvas": true,
+      "bodyTextLen": 326,
+      "bodyTextHash": "d9fd18d2083f9ddf8ad6cee59978e1e9231923c02fd40f8342e3a486d7701892",
+      "bodyTextPrefix": "FV SOUTHERN GIRL · BODKIN POINT SEAFOOD SOUTHERN GIRL POTS A 45-",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-built-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-built.json",
+  "divergesFromBaseline": false,
+  "baselineReasons": []
+}

@@ -1,0 +1,35 @@
+GitHub upload helper
+====================
+
+Prefer GitHub Desktop (https://desktop.github.com/) — one push, whole tree.
+Web Upload with Ctrl+A often skips nested folders.
+
+If you use the GitHub website "Upload files":
+1. Extract this zip.
+2. Open the extracted zip root.
+3. Drag these top-level folders AND root files onto the upload area
+   (do not rely on Ctrl+A alone — nested folders get missed).
+
+Folders to drag:
+  - .tanstack/
+  - artifacts/
+  - attachments/
+  - migrations/
+  - public/
+  - screenshots/
+  - scripts/
+  - server/
+  - src/
+
+Root files to drag:
+  - .prettierrc
+  - AGENTS.md
+  - eslint.config.mjs
+  - GITHUB-UPLOAD.txt
+  - package-lock.json
+  - package.json
+  - startup.sh
+  - tsconfig.json
+  - vite.config.ts
+
+Tip: Select each folder and each root file, or use GitHub Desktop / git push instead.
