@@ -53,7 +53,7 @@ export const Route = createRootRoute({
           }}
         >
           <img
-            src="/gear-logo-cutout.svg"
+            src="/gear-logo-cutout.png"
             alt=""
             height={56}
             width={213}
